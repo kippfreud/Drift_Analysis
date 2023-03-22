@@ -40,7 +40,7 @@ allmses = []
 allshufflemses = []
 print(f"Starting for {args.br}...")
 
-files = [f for f in files if "F-2009-09-24" in f]
+# files = [f for f in files if "F-2009-09-24" in f]
 #F-2009-09-24_train
 for file in sorted(files):
 
@@ -202,10 +202,10 @@ for file in sorted(files):
 
         gc.collect()
 
-# df = pd.DataFrame(error_data)
-# output_file = "csvs/" + RAT_NAME + "_" + args.br + ".csv"
-# df.to_csv(output_file)
-#
-# df = pd.DataFrame(shuffle_error_data)
-# output_file = "csvs/" + RAT_NAME + "_" + args.br + "_SHUFFLE_MEDIAN.csv"
-# df.to_csv(output_file)
+df = pd.DataFrame(error_data)
+output_file = "csvs/" + RAT_NAME + "_" + args.br + ".csv"
+df.to_csv(output_file)
+
+df = pd.DataFrame(shuffle_error_data)
+output_file = "csvs/" + RAT_NAME + "_" + args.br + "_SHUFFLE_MEDIAN.csv"
+df.to_csv(output_file)
