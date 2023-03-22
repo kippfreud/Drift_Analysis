@@ -40,6 +40,8 @@ allmses = []
 allshufflemses = []
 print(f"Starting for {args.br}...")
 
+files = [f for f in files if "F-2009-09-24" in f]
+#F-2009-09-24_train
 for file in sorted(files):
 
     train_file = file[:-8]+"_train.h5"
@@ -97,13 +99,16 @@ for file in sorted(files):
             true_loc_batch = true_out[0]
             for i in range(true_loc_batch.shape[0]):
                 true_loc = true_loc_batch[i]
-                pred_loc = pred_out[0][i]
+                if pred_out.shape == (8,4,2):
+                    pred_loc = pred_out[i]
+                else:
+                    pred_loc = pred_out[0][i]
 
-                true_dir = true_out[1][0][-1][0]
-                pred_dir = pred_out[1][0][-1][0]
-
-                true_spd = true_out[2][0][-1][0]
-                pred_spd = pred_out[2][0][-1][0]
+                # true_dir = true_out[1][0][-1][0]
+                # pred_dir = pred_out[1][0][-1][0]
+                #
+                # true_spd = true_out[2][0][-1][0]
+                # pred_spd = pred_out[2][0][-1][0]
 
                 index = 0
                 true_loc = true_loc[-1]
@@ -127,7 +132,7 @@ for file in sorted(files):
                 yer = (true_loc[1] - pred_loc[1]) * (1.3 / 576.)
                 err = (xer ** 2 + yer ** 2) ** 0.5
                 ERROR.append(err)
-                SPEEDS.append(true_spd)
+                #SPEEDS.append(true_spd)
 
                 n += 1
             if n > N:
@@ -197,10 +202,10 @@ for file in sorted(files):
 
         gc.collect()
 
-df = pd.DataFrame(error_data)
-output_file = "csvs/" + RAT_NAME + "_" + args.br + ".csv"
-df.to_csv(output_file)
-
-df = pd.DataFrame(shuffle_error_data)
-output_file = "csvs/" + RAT_NAME + "_" + args.br + "_SHUFFLE_MEDIAN.csv"
-df.to_csv(output_file)
+# df = pd.DataFrame(error_data)
+# output_file = "csvs/" + RAT_NAME + "_" + args.br + ".csv"
+# df.to_csv(output_file)
+#
+# df = pd.DataFrame(shuffle_error_data)
+# output_file = "csvs/" + RAT_NAME + "_" + args.br + "_SHUFFLE_MEDIAN.csv"
+# df.to_csv(output_file)
