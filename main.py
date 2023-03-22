@@ -65,6 +65,6 @@ losses, output_predictions, indices, _ = deepinsight.analyse.get_model_loss(trai
 shuffled_losses = deepinsight.analyse.get_shuffled_model_loss(train_path_in, axis=1, stepsize=100)
 
 # Plot influence across behaviours
-deepinsight.visualize.plot_residuals(train_path_in, losses=losses, shuffled_losses=shuffled_losses, frequency_spacing=2, output_names=['Position', 'Head Direction', 'Speed'])
+#deepinsight.visualize.plot_residuals(train_path_in, losses=losses, shuffled_losses=shuffled_losses, frequency_spacing=2, output_names=['Position', 'Head Direction', 'Speed'])
 plt.show()
 exit(0)

@@ -133,13 +133,7 @@ for file in sorted(files):
             if n > N:
                 print(f"num oob = {num_oob}/{n}")
                 break
-        #ERROR = [min(e, 2) for e in ERROR]
         mse = np.mean(ERROR)
-        # plt.hist(ERROR)
-        # plt.title(
-        #     f"Rat {RAT_NAME} Train: {train_date} Test: {test_date} (mean = {round(np.mean(ERROR), 1)} max = {round(max(ERROR), 1)}) ")
-        # plt.savefig(f"hists/error_hist_figs/{RAT_NAME}{args.br}-Tr{train_date}-Te{test_date}.png")
-        # plt.clf()
         allmses.append(mse)
         error_data[train_date][test_date] = mse
 
@@ -153,22 +147,19 @@ for file in sorted(files):
         num_oob = 0
         for inp, true_out in training_generator:
             #pred_out = shmodel.predict(inp)
-            pred_out = train_hdf5_file["outputs/position"][sorted(np.random.choice(range(train_hdf5_file["outputs/position"].shape[0]),opts["batch_size"], replace=False))]
+            #pred_out = train_hdf5_file["outputs/position"][sorted(np.random.choice(range(train_hdf5_file["outputs/position"].shape[0]),opts["batch_size"], replace=False))]
+            pred_out = [np.mean(train_hdf5_file["outputs/position"], axis=0) for i in range(opts["batch_size"])]
             true_loc_batch = true_out[0]
             for i in range(true_loc_batch.shape[0]):
                 true_loc = true_loc_batch[i]
                 # pred_loc = pred_out[0][i]
                 pred_loc = pred_out[i]
-
                 # true_dir = true_out[1][0][-1][0]
                 # pred_dir = pred_out[1][0][-1][0]
-                #
                 # true_spd = true_out[2][0][-1][0]
                 # pred_spd = pred_out[2][0][-1][0]
-
                 index = 0
                 true_loc = true_loc[-1]
-
                 #pred_loc = pred_loc[-1]
                 if pred_loc[0] < 0 or pred_loc[0] > 720 or pred_loc[1] < 0 or pred_loc[1] > 576:
                     pred_loc = [max(min(pred_loc[0], 720), 0), max(min(pred_loc[1], 576), 0)]
@@ -203,8 +194,6 @@ for file in sorted(files):
         #     f"Rat {RAT_NAME} Train: {train_date} Test: {test_date} (mean = {round(np.mean(ERROR/mse_shuffle), 1)} max = {round(max(ERROR/mse_shuffle), 1)}) ")
         # plt.savefig(f"hists/normed_error_histograms/{RAT_NAME}{args.br}-Tr{train_date}-Te{test_date}.png")
         # plt.clf()
-        allmses.append(mse)
-        error_data[train_date][test_date] = mse
 
         gc.collect()
 
@@ -213,5 +202,5 @@ output_file = "csvs/" + RAT_NAME + "_" + args.br + ".csv"
 df.to_csv(output_file)
 
 df = pd.DataFrame(shuffle_error_data)
-output_file = "csvs/" + RAT_NAME + "_" + args.br + "_SHUFFLE.csv"
+output_file = "csvs/" + RAT_NAME + "_" + args.br + "_SHUFFLE_MEDIAN.csv"
 df.to_csv(output_file)
