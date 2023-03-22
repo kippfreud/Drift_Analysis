@@ -99,7 +99,7 @@ for file in sorted(files):
             true_loc_batch = true_out[0]
             for i in range(true_loc_batch.shape[0]):
                 true_loc = true_loc_batch[i]
-                if pred_out.shape == (8,4,2):
+                if not isinstance(pred_out, list):
                     pred_loc = pred_out[i]
                 else:
                     pred_loc = pred_out[0][i]
@@ -207,5 +207,5 @@ output_file = "csvs/" + RAT_NAME + "_" + args.br + ".csv"
 df.to_csv(output_file)
 
 df = pd.DataFrame(shuffle_error_data)
-output_file = "csvs/" + RAT_NAME + "_" + args.br + "_SHUFFLE_MEDIAN.csv"
+output_file = "csvs/" + RAT_NAME + "_" + args.br + "_SHUFFLE.csv"
 df.to_csv(output_file)
