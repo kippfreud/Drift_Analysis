@@ -135,11 +135,11 @@ for file in sorted(files):
                 break
         #ERROR = [min(e, 2) for e in ERROR]
         mse = np.mean(ERROR)
-        plt.hist(ERROR)
-        plt.title(
-            f"Rat {RAT_NAME} Train: {train_date} Test: {test_date} (mean = {round(np.mean(ERROR), 1)} max = {round(max(ERROR), 1)}) ")
-        plt.savefig(f"hists/error_hist_figs/{RAT_NAME}{args.br}-Tr{train_date}-Te{test_date}.png")
-        plt.clf()
+        # plt.hist(ERROR)
+        # plt.title(
+        #     f"Rat {RAT_NAME} Train: {train_date} Test: {test_date} (mean = {round(np.mean(ERROR), 1)} max = {round(max(ERROR), 1)}) ")
+        # plt.savefig(f"hists/error_hist_figs/{RAT_NAME}{args.br}-Tr{train_date}-Te{test_date}.png")
+        # plt.clf()
         allmses.append(mse)
         error_data[train_date][test_date] = mse
 
@@ -190,19 +190,19 @@ for file in sorted(files):
                 break
         #shERROR = [min(e, 2) for e in shERROR]
         mse_shuffle = np.mean(shERROR)
-        plt.hist(shERROR)
-        plt.title(
-            f"Rat {RAT_NAME} Train: {train_date} Test: {test_date} (mean = {round(np.mean(shERROR), 1)} max = {round(max(shERROR), 1)}) ")
-        plt.savefig(f"hists/shuffle_error_hist_figs/{RAT_NAME}{args.br}-Tr{train_date}-Te{test_date}.png")
-        plt.clf()
+        # plt.hist(shERROR)
+        # plt.title(
+        #     f"Rat {RAT_NAME} Train: {train_date} Test: {test_date} (mean = {round(np.mean(shERROR), 1)} max = {round(max(shERROR), 1)}) ")
+        # plt.savefig(f"hists/shuffle_error_hist_figs/{RAT_NAME}{args.br}-Tr{train_date}-Te{test_date}.png")
+        # plt.clf()
         allshufflemses.append(mse_shuffle)
         shuffle_error_data[train_date][test_date] = mse_shuffle
 
-        plt.hist(ERROR/mse_shuffle)
-        plt.title(
-            f"Rat {RAT_NAME} Train: {train_date} Test: {test_date} (mean = {round(np.mean(ERROR/mse_shuffle), 1)} max = {round(max(ERROR/mse_shuffle), 1)}) ")
-        plt.savefig(f"hists/normed_error_histograms/{RAT_NAME}{args.br}-Tr{train_date}-Te{test_date}.png")
-        plt.clf()
+        # plt.hist(ERROR/mse_shuffle)
+        # plt.title(
+        #     f"Rat {RAT_NAME} Train: {train_date} Test: {test_date} (mean = {round(np.mean(ERROR/mse_shuffle), 1)} max = {round(max(ERROR/mse_shuffle), 1)}) ")
+        # plt.savefig(f"hists/normed_error_histograms/{RAT_NAME}{args.br}-Tr{train_date}-Te{test_date}.png")
+        # plt.clf()
         allmses.append(mse)
         error_data[train_date][test_date] = mse
 
