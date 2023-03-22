@@ -40,13 +40,13 @@ allmses = []
 allshufflemses = []
 print(f"Starting for {args.br}...")
 
-for train_file in files:
+for train_file in sorted(files):
 
     train_date = train_file[2:12]
     error_data[train_date] = {}
     shuffle_error_data[train_date] = {}
 
-    for test_file in files:
+    for test_file in sorted(files):
 
         tf.keras.backend.clear_session()
 
@@ -56,7 +56,7 @@ for train_file in files:
         training_generator_og.shuffle = False
         training_generator_og.random_batches = False
 
-        if test_date != train_date:
+        if test_date == train_date:
             hdf5_in = test_file
         else:
             hdf5_in = test_file[:-8] + ".h5"
@@ -125,12 +125,12 @@ for train_file in files:
                 n += 1
             if n > N:
                  break
-        ERROR = [max(e, 2) for e in ERROR]
+        ERROR = [min(e, 2) for e in ERROR]
         mse = np.mean(ERROR)
         plt.hist(ERROR)
         plt.title(
             f"Rat {RAT_NAME} Train: {train_date} Test: {test_date} (mean = {round(np.mean(ERROR), 1)} max = {round(max(ERROR), 1)}) ")
-        plt.savefig(f"hists/error_hist_figs/{RAT_NAME}-Tr{train_date}-Te{test_date}.png")
+        plt.savefig(f"hists/error_hist_figs/{RAT_NAME}{args.br}-Tr{train_date}-Te{test_date}.png")
         plt.clf()
         allmses.append(mse)
         error_data[train_date][test_date] = mse
@@ -171,12 +171,12 @@ for train_file in files:
                 n += 1
             if n > N:
                 break
-        shERROR = [max(e, 2) for e in shERROR]
+        shERROR = [min(e, 2) for e in shERROR]
         mse_shuffle = np.mean(shERROR)
         plt.hist(shERROR)
         plt.title(
             f"Rat {RAT_NAME} Train: {train_date} Test: {test_date} (mean = {round(np.mean(shERROR), 1)} max = {round(max(shERROR), 1)}) ")
-        plt.savefig(f"hists/shuffle_error_hist_figs/{RAT_NAME}-Tr{train_date}-Te{test_date}.png")
+        plt.savefig(f"hists/shuffle_error_hist_figs/{RAT_NAME}{args.br}-Tr{train_date}-Te{test_date}.png")
         plt.clf()
         allshufflemses.append(mse_shuffle)
         shuffle_error_data[train_date][test_date] = mse_shuffle
@@ -184,7 +184,7 @@ for train_file in files:
         plt.hist(ERROR/mse_shuffle)
         plt.title(
             f"Rat {RAT_NAME} Train: {train_date} Test: {test_date} (mean = {round(np.mean(ERROR/mse_shuffle), 1)} max = {round(max(ERROR/mse_shuffle), 1)}) ")
-        plt.savefig(f"hists/normed_error_histograms/{RAT_NAME}-Tr{train_date}-Te{test_date}.png")
+        plt.savefig(f"hists/normed_error_histograms/{RAT_NAME}{args.br}-Tr{train_date}-Te{test_date}.png")
         plt.clf()
         allmses.append(mse)
         error_data[train_date][test_date] = mse
@@ -193,4 +193,8 @@ for train_file in files:
 
 df = pd.DataFrame(error_data)
 output_file = "csvs/" + RAT_NAME + "_" + args.br + ".csv"
+df.to_csv(output_file)
+
+df = pd.DataFrame(shuffle_error_data)
+output_file = "csvs/" + RAT_NAME + "_" + args.br + "_SHUFFLE.csv"
 df.to_csv(output_file)
