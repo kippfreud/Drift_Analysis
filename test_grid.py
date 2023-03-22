@@ -40,27 +40,27 @@ allmses = []
 allshufflemses = []
 print(f"Starting for {args.br}...")
 
-for train_file in sorted(files):
+for file in sorted(files):
 
+    train_file = file[:-8]+"_train.h5"
     train_date = train_file[2:12]
     error_data[train_date] = {}
     shuffle_error_data[train_date] = {}
 
     for test_file in sorted(files):
 
+        print(f"Running tr {train_file} te {test_file}")
+
         tf.keras.backend.clear_session()
 
         test_date = test_file[2:12]
 
-        (model, _, _, _) = util.hdf5.load_model_with_opts(MODEL_PATH + '/' + train_file[:-8] + "_train_model_4.h5")
-        # training_generator_og.shuffle = False
-        # training_generator_og.random_batches = False
+        (model, _, _, _) = util.hdf5.load_model_with_opts(MODEL_PATH + '/' + train_file[:-9] + "_train_model_4.h5")
 
         if test_date == train_date:
             hdf5_in = test_file
         else:
             hdf5_in = test_file[:-8] + ".h5"
-        #hdf5_in = 'frey.h5'
         val_hdf5_file = h5py.File('data/'+hdf5_in, mode='r')
         val_t_w = val_hdf5_file['inputs/wavelets']
         tmp_opts = util.opts.get_opts(hdf5_in, train_test_times=(np.array([]), np.array([])))
@@ -86,11 +86,7 @@ for train_file in sorted(files):
         opts['random_batches'] = True
         opts['batch_size'] = 8
         (training_generator, _) = util.data_generator.create_train_and_test_generators(opts)
-
-        #(shuf_training_generator, _) = util.data_generator.create_shuffle_train_and_test_generators(opts)
-
-
-
+        (shuf_training_generator, _) = util.data_generator.create_shuffle_train_and_test_generators(opts)
         ERROR = []
         SPEEDS = []
 
@@ -137,7 +133,7 @@ for train_file in sorted(files):
             if n > N:
                 print(f"num oob = {num_oob}/{n}")
                 break
-        ERROR = [min(e, 2) for e in ERROR]
+        #ERROR = [min(e, 2) for e in ERROR]
         mse = np.mean(ERROR)
         plt.hist(ERROR)
         plt.title(
@@ -147,8 +143,8 @@ for train_file in sorted(files):
         allmses.append(mse)
         error_data[train_date][test_date] = mse
 
-
-        #(shmodel, _, _, _) = util.hdf5.load_model_with_opts(f"{MODEL_PATH}/SHUFFLE-" + train_file[:-8] + "_train_model_4.h5")
+        # #SHUFLE MODELS
+        # (shmodel, _, _, _) = util.hdf5.load_model_with_opts(f"{MODEL_PATH}/SHUFFLE-" + train_file[:-8] + "_train_model_4.h5")
         train_hdf5_file = h5py.File('data/'+train_file, mode='r')#["outputs/position"]
 
         shERROR = []
@@ -175,6 +171,7 @@ for train_file in sorted(files):
 
                 #pred_loc = pred_loc[-1]
                 if pred_loc[0] < 0 or pred_loc[0] > 720 or pred_loc[1] < 0 or pred_loc[1] > 576:
+                    pred_loc = [max(min(pred_loc[0], 720), 0), max(min(pred_loc[1], 576), 0)]
                     #print(pred_loc)
                     num_oob += 1
                 # pred_loc = np.array([np.random.uniform(266,705), np.random.uniform(59,462)])
@@ -185,13 +182,13 @@ for train_file in sorted(files):
                 yer = (true_loc[1] - pred_loc[1]) * (1.3 / 576.)
                 err = (xer ** 2 + yer ** 2) ** 0.5
                 shERROR.append(err)
-                shSPEEDS.append(true_spd)
+                #shSPEEDS.append(true_spd)
 
                 n += 1
             if n > N:
                 print(f"num oob SHUFFLED = {num_oob}/{n}")
                 break
-        shERROR = [min(e, 2) for e in shERROR]
+        #shERROR = [min(e, 2) for e in shERROR]
         mse_shuffle = np.mean(shERROR)
         plt.hist(shERROR)
         plt.title(
