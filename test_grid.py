@@ -40,21 +40,21 @@ allmses = []
 allshufflemses = []
 print(f"Starting for {args.br}...")
 
-for train_file in sorted(files):
+for train_file in sorted(files)[0:6]:
 
     train_date = train_file[2:12]
     error_data[train_date] = {}
     shuffle_error_data[train_date] = {}
 
-    for test_file in sorted(files):
+    for test_file in sorted(files)[0:6]:
 
         tf.keras.backend.clear_session()
 
         test_date = test_file[2:12]
 
-        (model, training_generator_og, testing_generator, opts) = util.hdf5.load_model_with_opts(MODEL_PATH + '/' + train_file[:-8] + "_train_model_4.h5")
-        training_generator_og.shuffle = False
-        training_generator_og.random_batches = False
+        (model, _, _, _) = util.hdf5.load_model_with_opts(MODEL_PATH + '/' + train_file[:-8] + "_train_model_4.h5")
+        # training_generator_og.shuffle = False
+        # training_generator_og.random_batches = False
 
         if test_date == train_date:
             hdf5_in = test_file
@@ -85,9 +85,9 @@ for train_file in sorted(files):
         opts['shuffle'] = True
         opts['random_batches'] = True
         opts['batch_size'] = 8
-        (training_generator, testing_generator) = util.data_generator.create_train_and_test_generators(opts)
+        (training_generator, _) = util.data_generator.create_train_and_test_generators(opts)
 
-        (shuf_training_generator, _) = util.data_generator.create_shuffle_train_and_test_generators(opts)
+        #(shuf_training_generator, _) = util.data_generator.create_shuffle_train_and_test_generators(opts)
 
 
 
@@ -95,6 +95,7 @@ for train_file in sorted(files):
         SPEEDS = []
 
         n = 1
+        num_oob = 0
         for inp, true_out in training_generator:
             pred_out = model.predict(inp)
             true_loc_batch = true_out[0]
@@ -112,6 +113,16 @@ for train_file in sorted(files):
                 true_loc = true_loc[-1]
 
                 pred_loc = pred_loc[-1]
+                if pred_loc[0] < 0 or pred_loc[0] > 720 or pred_loc[1] < 0 or pred_loc[1] > 576:
+                    #print(pred_loc)
+                    pred_loc = [max(min(pred_loc[0], 720), 0), max(min(pred_loc[1], 576), 0)]
+                    num_oob += 1
+                if true_loc[0] < 0 or true_loc[0] > 720 or true_loc[1] < 0 or true_loc[1] > 576:
+                    true_loc = [max(min(true_loc[0], 720), 0), max(min(true_loc[1], 576), 0)]
+                    #num_oob += 1
+                #     print("model is OOB")
+                #     print(pred_loc)
+                # print(pred_loc)
                 # pred_loc = np.array([np.random.uniform(266,705), np.random.uniform(59,462)])
                 #pred_loc = np.array([np.random.uniform(0, 720), np.random.uniform(0, 576)])
                 #pred_loc = np.array(np.mean(training_generator_og.outputs[0], axis=0))
@@ -124,7 +135,8 @@ for train_file in sorted(files):
 
                 n += 1
             if n > N:
-                 break
+                print(f"num oob = {num_oob}/{n}")
+                break
         ERROR = [min(e, 2) for e in ERROR]
         mse = np.mean(ERROR)
         plt.hist(ERROR)
@@ -136,28 +148,35 @@ for train_file in sorted(files):
         error_data[train_date][test_date] = mse
 
 
+        #(shmodel, _, _, _) = util.hdf5.load_model_with_opts(f"{MODEL_PATH}/SHUFFLE-" + train_file[:-8] + "_train_model_4.h5")
+        train_hdf5_file = h5py.File('data/'+train_file, mode='r')#["outputs/position"]
 
-        (model, training_generator_og, testing_generator, opts) = util.hdf5.load_model_with_opts(f"{MODEL_PATH}/SHUFFLE-" + train_file[:-8] + "_train_model_4.h5")
         shERROR = []
         shSPEEDS = []
         n = 1
-        for inp, true_out in shuf_training_generator:
-            pred_out = model.predict(inp)
+        num_oob = 0
+        for inp, true_out in training_generator:
+            #pred_out = shmodel.predict(inp)
+            pred_out = train_hdf5_file["outputs/position"][sorted(np.random.choice(range(train_hdf5_file["outputs/position"].shape[0]),opts["batch_size"], replace=False))]
             true_loc_batch = true_out[0]
             for i in range(true_loc_batch.shape[0]):
                 true_loc = true_loc_batch[i]
-                pred_loc = pred_out[0][i]
+                # pred_loc = pred_out[0][i]
+                pred_loc = pred_out[i]
 
-                true_dir = true_out[1][0][-1][0]
-                pred_dir = pred_out[1][0][-1][0]
-
-                true_spd = true_out[2][0][-1][0]
-                pred_spd = pred_out[2][0][-1][0]
+                # true_dir = true_out[1][0][-1][0]
+                # pred_dir = pred_out[1][0][-1][0]
+                #
+                # true_spd = true_out[2][0][-1][0]
+                # pred_spd = pred_out[2][0][-1][0]
 
                 index = 0
                 true_loc = true_loc[-1]
 
-                pred_loc = pred_loc[-1]
+                #pred_loc = pred_loc[-1]
+                if pred_loc[0] < 0 or pred_loc[0] > 720 or pred_loc[1] < 0 or pred_loc[1] > 576:
+                    #print(pred_loc)
+                    num_oob += 1
                 # pred_loc = np.array([np.random.uniform(266,705), np.random.uniform(59,462)])
                 # pred_loc = np.array([np.random.uniform(0, 720), np.random.uniform(0, 576)])
                 # pred_loc = np.array(np.mean(training_generator_og.outputs[0], axis=0))
@@ -170,6 +189,7 @@ for train_file in sorted(files):
 
                 n += 1
             if n > N:
+                print(f"num oob SHUFFLED = {num_oob}/{n}")
                 break
         shERROR = [min(e, 2) for e in shERROR]
         mse_shuffle = np.mean(shERROR)
