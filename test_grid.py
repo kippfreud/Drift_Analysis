@@ -40,13 +40,13 @@ allmses = []
 allshufflemses = []
 print(f"Starting for {args.br}...")
 
-for train_file in sorted(files)[0:6]:
+for train_file in sorted(files):
 
     train_date = train_file[2:12]
     error_data[train_date] = {}
     shuffle_error_data[train_date] = {}
 
-    for test_file in sorted(files)[0:6]:
+    for test_file in sorted(files):
 
         tf.keras.backend.clear_session()
 
